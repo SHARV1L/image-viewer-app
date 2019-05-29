@@ -1,0 +1,32 @@
+.cardStyle {
+    width: 280px;
+    padding: 32px 64px 32px 64px;
+    margin-top: 30px;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+.formControl {
+    width: 280px;
+    
+}
+.login{
+    text-align: left;
+    margin-top: 20px;
+    
+}
+.pointer{
+    cursor: pointer;
+
+}
+.dispNone {
+    display: none;
+}
+
+.dispBlock {
+    display: block;
+}
+
+.red {
+    color: red;
+}
