@@ -2,12 +2,38 @@
     background-color: #263238;
     height: 40px;
     padding: 8px 32px 8px 16px;
+    display: flex;
+    align-items: center;
 }
-.appLogo{
+.appLogo
+{
     color:#fff;
     font-size: 18px;
     float: left;
-    padding: 5px 5px 5px 5px;
-    align-content: center;
-    justify-content: center;
+    
+}
+.avatar
+{   
+    width: 30px;
+    height: 30px;
+    background-color: #fff;
+}
+      .search-icon{
+          float:right;
+          background-color:#c0c0c0;
+          border-radius: 4px;
+          width:300px;
+          padding:2px;
+          display: flex;
+          align-items: center;
+          margin-left: 950px;
+          height: 30px;
+      }
+
+.user-pic{
+    float: right;
+    margin-left:40px;
+}
+.start{
+    float: left;
 }

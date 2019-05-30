@@ -1,8 +1,10 @@
 import React,{Component} from 'react';
+import Header from '../../common/header/Header';
+
 class Home extends Component{
     render(){
         return(
-            <div>Home Page</div>
+            <div><Header showSearchIcon="true" showUserPic="true"/></div>
         )
     }
 }
