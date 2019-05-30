@@ -16,7 +16,7 @@
 {   
     width: 30px;
     height: 30px;
-    background-color: #fff;
+    cursor: pointer;
 }
       .search-icon{
           float:right;
