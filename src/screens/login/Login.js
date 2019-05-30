@@ -11,6 +11,7 @@ import './Login.css';
 import Button from '@material-ui/core/Button';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Home from '../../screens/home/Home';
+import {Link} from 'react-router-dom';
 
 class Login extends Component{
     constructor(){
@@ -42,7 +43,8 @@ helpertext:"required"
           //  var accessToken="cnbh";
             if(this.state.username===username&&this.state.password===password)
             {
-                ReactDOM.render(<Home userDetails={this.state}/>,document.getElementById('root'));
+               // ReactDOM.render(<Home userDetails={this.state}/>,document.getElementById('root'));
+               this.props.history.push({pathname:'/home',userDetails:this.state});
             }
            else{
              this.setState({helpertext:"Incorrect Username/Password",reqPassword:"dispBlock"});
