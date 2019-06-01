@@ -20,7 +20,8 @@ class Login extends Component{
     password:"",
 reqUsername:"dispNone",
 reqPassword:"dispNone",
-helpertext:"required"
+helpertext:"required",
+accessToken:"8661035776.d0fcd39.39f63ab2f88d4f9c92b0862729ee2784"
 }
     }
 
@@ -33,18 +34,18 @@ helpertext:"required"
     loginButtonHandler=()=>{
         var username="himadri";
         var password="hello123";
-
+       // var accessToken="8661035776.d0fcd39.39f63ab2f88d4f9c92b0862729ee2784";
         this.state.username===""?this.setState({reqUsername:"dispBlock" , helpertext:"required"}):this.setState({reqUsername:"dispNone"});
         this.state.password===""?this.setState({reqPassword:"dispBlock" , helpertext:"required"}):this.setState({reqPassword:"dispNone"});
         
-        if(this.state.username!=""&&this.state.password!="")
+        if(this.state.username!==""&&this.state.password!=="")
         {
             
-          //  var accessToken="cnbh";
+           
             if(this.state.username===username&&this.state.password===password)
             {
                // ReactDOM.render(<Home userDetails={this.state}/>,document.getElementById('root'));
-               this.props.history.push({pathname:'/home',userDetails:this.state});
+               this.props.history.push({pathname:'/home',userDetails:this.state.accessToken});
             }
            else{
              this.setState({helpertext:"Incorrect Username/Password",reqPassword:"dispBlock"});
