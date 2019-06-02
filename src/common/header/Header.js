@@ -120,6 +120,21 @@ class Header extends Component{
                                 </StyledMenu>
 
                 </div>:""} 
+          {this.props.showUserProfile==="true"?
+                <div className="profile">
+                <Avatar alt={this.props.userName} src={this.props.pic_url2} className="avatar"
+                onClick={this.handleClick}
+                aria-owns={this.state.anchorEl ? 'simple-menu' : undefined}
+                aria-haspopup="true"/>
+                 <StyledMenu id="simple-menu" anchorEl={this.state.anchorEl} open={Boolean(this.state.anchorEl)} onClose={this.handleClose.bind(this,'')}>
+                                    
+                                     
+                                      <StyledMenuItem className="menu-item" onClick={this.logoutHandler}>
+                                      <ListItemText primary="Logout" />
+                                    </StyledMenuItem> 
+                                </StyledMenu>
+
+                </div>:""} 
             </header>
             </div>
         )
