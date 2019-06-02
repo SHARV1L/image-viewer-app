@@ -10,6 +10,8 @@ import Grid from '@material-ui/core/Grid';
 import CardMedia from '@material-ui/core/CardMedia';
 import Container from '@material-ui/core/Container';
 import Favorite from '@material-ui/icons/Favorite';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 
 //import * as moment from 'moment';
 
@@ -121,9 +123,30 @@ class Home extends Component{
             this.props.history.push('/profile');
         }
        // adding comment
-       addCommentHandler=()=>{
-           
-       }
+       // adding comment
+    onAddCommentClicked = (id) => {
+        if (this.state.currentComment === "" || typeof this.state.currentComment === undefined) {
+          return;
+        }
+  
+        let commentList = this.state.comments.hasOwnProperty(id)?
+          this.state.comments[id].concat(this.state.currentComment): [].concat(this.state.currentComment);
+  
+        this.setState({
+          comments:{
+            ...this.state.comments,
+            [id]:commentList
+          },
+          currentComment:''
+        })
+      }
+     //writing comment
+      commentChangeHandler = (e) => {
+        this.setState({
+          currentComment:e.target.value
+        });
+      }
+
         
     
     render(){
@@ -193,11 +216,18 @@ class Home extends Component{
                                             
                                         </Grid>
                                         </CardActions>
-                                    <CardActions>
-                                     <Grid container spacing={1} justify="flex-start"><Grid item>
-                                         <Input placeholder="Add a comment" fullWidth={true}onChange={this.addCommentHandler}/> </Grid>  </Grid>
-                                             <Button className="pointer"variant="contained" color="primary" >ADD</Button>     
-                                             </CardActions>  
+                                    <div className="rowStyle">
+                              <FormControl style={{flexGrow:1}}>
+                                <InputLabel htmlFor="comment">Add Comment</InputLabel>
+                                <Input id="comment" value={this.state.currentComment} onChange={this.commentChangeHandler}/>
+                              </FormControl>
+                              <FormControl>
+                                <Button onClick={this.onAddCommentClicked}
+                                   variant="contained" color="primary">
+                                  ADD
+                                </Button>
+                              </FormControl>
+                            </div>
                                     
                                     
                                                     
