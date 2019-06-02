@@ -21,7 +21,8 @@ class Login extends Component{
 reqUsername:"dispNone",
 reqPassword:"dispNone",
 helpertext:"required",
-accessToken:"8661035776.d0fcd39.39f63ab2f88d4f9c92b0862729ee2784"
+accessToken:"8661035776.d0fcd39.39f63ab2f88d4f9c92b0862729ee2784",
+loggedIn:"false"
 }
     }
 
@@ -45,7 +46,9 @@ accessToken:"8661035776.d0fcd39.39f63ab2f88d4f9c92b0862729ee2784"
             if(this.state.username===username&&this.state.password===password)
             {
                // ReactDOM.render(<Home userDetails={this.state}/>,document.getElementById('root'));
-               this.props.history.push({pathname:'/home',userDetails:this.state.accessToken});
+               this.props.history.push({pathname:'/home'});
+               sessionStorage.setItem('access-token', this.state.accessToken);
+               this.setState({ loggedIn: true });
             }
            else{
              this.setState({helpertext:"Incorrect Username/Password",reqPassword:"dispBlock"});
