@@ -208,9 +208,10 @@ class Profile extends Component {
         return(
             <div>
                 <Header
-                  screen={"Profile"}
-                  pic_url={this.state.profile_picture}
-                  handleLogout={this.logout}/>
+                  showUserProfile="true"
+                  pic_url2={this.state.profile_picture}
+                  userName={this.state.username}
+                   handleLogout={this.logout}/>
                 <div className="user-info-section">
                     <Avatar
                         alt="User Image"
