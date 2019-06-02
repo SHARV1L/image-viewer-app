@@ -37,3 +37,7 @@
 .start{
     float: left;
 }
+.profile{
+    float: right;
+    margin-left:90%;
+}
