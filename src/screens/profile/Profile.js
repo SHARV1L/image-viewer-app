@@ -1,410 +1,347 @@
-import React, { Component } from 'react';
+
+           
+   import React, {Component} from 'react';
 import './Profile.css';
 import Header from '../../common/header/Header';
 import Avatar from '@material-ui/core/Avatar';
-import { withStyles } from '@material-ui/styles';
-import Typography from '@material-ui/core/Typography';
-import Fab from '@material-ui/core/Fab';
-import Create from '@material-ui/icons/Create';
-import Favorite from '@material-ui/icons/Favorite';
-import Modal from '@material-ui/core/Modal';
 import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
+import Modal from '@material-ui/core/Modal';
+import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Input from '@material-ui/core/Input';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import CardMedia from '@material-ui/core/CardMedia';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
-import Grid from '@material-ui/core/Grid';
-import Divider from '@material-ui/core/Divider';
-import Container from '@material-ui/core/Container';
+import IconButton from '@material-ui/core/IconButton';
+import FavoriteIconBorder from '@material-ui/icons/FavoriteBorder';
+import FavoriteIconFill from '@material-ui/icons/Favorite';
 
-
-const styles = theme => ({
-    bigAvatar: {
-        margin: 10,
-        width: 50,
-        height: 50,
-    },
-    fab: {
-        margin: 8,
-    },
+const profileStyles = {
     paper: {
-        position: 'absolute',
-        width: 250,
-        backgroundColor: 'white',
-        padding: 16,
-        outline: 'none',
-        top: `50%`,
-        left: `50%`,
-        transform: `translate(-50%, -50%)`
+        position: 'relative',
+        width: "180px",
+        backgroundColor: "#fff",
+        top: "30%",
+        margin: "0 auto",
+        boxShadow: "2px 2px #888888",
+        padding: "20px"
     },
-    paper_big: {
-        position: 'absolute',
-        width: 600,
-        backgroundColor: 'white',
-        padding: 16,
-        outline: 'none',
-        top: `50%`,
-        left: `50%`,
-        transform: `translate(-50%, -50%)`
+    media: {
+        height: '200px',
+        paddingTop: '56.25%', // 16:9
+    },
+    imageModal: {
+        backgroundColor: "#fff",
+        margin: "0 auto",
+        boxShadow: "2px 2px #888888",
+        padding: "10px",
     }
-});
+};
 
 class Profile extends Component {
 
     constructor(props) {
         super(props);
+        if (sessionStorage.getItem('access-token') == null) {
+            props.history.replace('/');
+        }
         this.state = {
-            profile_picture: '',
-            username: '',
-            media: 0,
-            follows: 0,
-            followed_by: 0,
-            full_name: '',
-            userPosts: null,
-            access_token: sessionStorage.getItem('access-token'),
-            editNameOpen: false,
-            fullnameRequired: 'dispNone',
-            editFullName: '',
-            postItemOpen: false,
-            selectedPost: null,
-            selectedIndex: -1,
-            addNewComment: ''
-        };
+            profile_picture: null,
+            username: null,
+            full_name: null,
+            posts: null,
+            follows: null,
+            followed_by: null,
+            editOpen: false,
+            fullNameRequired: 'dispNone',
+            newFullName: '',
+            mediaData: null,
+            imageModalOpen: false,
+            currentItem: null,
+            likeSet:new Set(),
+            comments:{},
+        }
     }
 
-    /**
-     * @description On component load - Get user profile and user posts
-     */
-    componentWillMount() {
+    componentDidMount() {
+        this.getUserInfo();
+        this.getMediaData();
+    }
 
-        // Get user profile
-        let dataUserProfile = null;
-        let xhrUserProfile = new XMLHttpRequest();
+    getUserInfo = () => {
         let that = this;
-        xhrUserProfile.addEventListener("readystatechange", function () {
-            if (this.readyState === 4) {
-                const data = JSON.parse(this.responseText).data;
-                that.setState({
-                    profile_picture: data.profile_picture,
-                    username: data.username,
-                    media: data.counts.media,
-                    follows: data.counts.follows,
-                    followed_by: data.counts.followed_by,
-                    full_name: data.full_name
-                });
-            }
-        });
-        xhrUserProfile.open("GET", this.props.baseUrl + "users/self/?access_token=" + this.state.access_token);
-        xhrUserProfile.setRequestHeader("Cache-Control", "no-cache");
-        xhrUserProfile.send(dataUserProfile);
-
-
-        // Get user posts
-        let dataUserPosts = null;
-        let xhrUserPosts = new XMLHttpRequest();
-        xhrUserPosts.addEventListener("readystatechange", function () {
-            if (this.readyState === 4) {
-                const data = JSON.parse(this.responseText).data;
-                that.setState({ userPosts: [...data] });
-            }
-        });
-        xhrUserPosts.open("GET", this.props.baseUrl + "users/self/media/recent?access_token=" + this.state.access_token);
-        xhrUserPosts.setRequestHeader("Cache-Control", "no-cache");
-        xhrUserPosts.send(dataUserPosts);
-
-    }
-
-    /**
-     * @memberof Profile
-     * @description To close edit full name modal and set values
-     */
-    handleEditNameClose = () => {
-        this.setState({
-            editNameOpen: false,
-            fullnameRequired: 'dispNone'
+        let myUrl = this.props.baseUrl + "?access_token=8661035776.d0fcd39.39f63ab2f88d4f9c92b0862729ee2784";
+        return fetch(myUrl, {
+            method: 'GET',
+        }).then((response) => {
+            return response.json();
+        }).then((jsonResponse) => {
+            that.setState({
+                profile_picture: jsonResponse.data.profile_picture,
+                username: jsonResponse.data.username,
+                full_name: jsonResponse.data.full_name,
+                posts: jsonResponse.data.counts.media,
+                follows: jsonResponse.data.counts.follows,
+                followed_by: jsonResponse.data.counts.followed_by
+            });
+        }).catch((error) => {
+            console.log('error user data',error);
         });
     }
 
-    /**
-     * @memberof Profile
-     * @description To open edit full name modal and set values
-     */
-    handleEditNameOpen = () => {
+    getMediaData = () => {
+        let that = this;
+        let myUrl = this.props.baseUrl + "media/recent?access_token=8661035776.d0fcd39.39f63ab2f88d4f9c92b0862729ee2784";
+        return fetch(myUrl,{
+            method: 'GET',
+        }).then((response) => {
+            return response.json();
+        }).then((jsonResponse) => {
+            that.setState({
+                mediaData: jsonResponse.data
+            });
+        }).catch((error) => {
+            console.log('error media data',error);
+        });
+    }
+
+    handleOpenEditModal = () => {
+        this.setState({ editOpen: true });
+    }
+
+    handleCloseEditModal = () => {
+        this.setState({ editOpen: false });
+    }
+
+    handleOpenImageModal = (event) => {
+        var result = this.state.mediaData.find(item => {
+            return item.id === event.target.id
+        })
+        this.setState({ imageModalOpen: true, currentItem: result });
+    }
+
+    handleCloseImageModal = () => {
+        this.setState({ imageModalOpen: false });
+    }
+
+    inputFullNameChangeHandler = (e) => {
         this.setState({
-            editFullName: this.state.full_name,
-            editNameOpen: true
+            newFullName: e.target.value
         })
     }
 
-    /**
-     * @memberof Profile
-     * @description Update user full name state  value and required field validation
-     */
-    updateNameClickHandler = () => {
-        this.state.editFullName === '' ? this.setState({ fullnameRequired: 'dispBlock' }) : this.setState({ fullnameRequired: 'dispNone' });
-        if (this.state.editFullName === '') {
-            return;
+    updateClickHandler = () => {
+        if (this.state.newFullName === '') {
+            this.setState({ fullNameRequired: 'dispBlock'})
         } else {
-            this.setState({ full_name: this.state.editFullName });
-        }
-    }
-
-    /**
-     * @memberof Profile
-     * @description Set state full name on every changes in values
-     */
-    inputFullNameChangeHandler = (e) => {
-        this.setState({ editFullName: e.target.value });
-    }
-
-    /**
-     * @memberof Profile
-     * @description On click of each post image  open modal with details
-     * @param _id - selected item id(key)
-     * @param _index - selected item array index
-     */
-    handlePostClickHandler = (_id, _index) => {
-        let _userPostItems = this.state.userPosts;
-        this.setState({
-            selectedPost: _userPostItems[_index],
-            selectedIndex: _index,
-            postItemOpen: true,
-            addNewComment: ''
-        });
-    }
-
-    /**
-     * @memberof Profile
-     * @description Handle post details modal close event
-     */
-    handlePostItemClose = () => {
-        this.setState({
-            selectedPost: null,
-            postItemOpen: false,
-            selectedIndex: -1
-        });
-    }
-
-    /**
-     * @memberof Profile
-     * @description like and unlike functionality 
-     */
-    likesClickHandler = () => {
-        let _selectedPostItem = this.state.selectedPost;
-        let _userPosts = this.state.userPosts;
-        const _selectedIndex = this.state.selectedIndex;
-        if (_selectedPostItem.user_has_liked) {
-            _selectedPostItem.user_has_liked = false;
-            _selectedPostItem.likes.count = (_selectedPostItem.likes.count) - 1;
-        } else {
-            _selectedPostItem.user_has_liked = true;
-            _selectedPostItem.likes.count = (_selectedPostItem.likes.count) + 1;
+            this.setState({ fullNameRequired: 'dispNone' })
         }
 
-        _userPosts[_selectedIndex] = _selectedPostItem;
+        if (this.state.newFullName === "") { return }
 
         this.setState({
-            selectedPost: _selectedPostItem,
-            userPosts: _userPosts
-        });
+            full_name: this.state.newFullName
+        })
+
+        this.handleCloseEditModal()
     }
 
-    /**
-     * @memberof Profile
-     * @description Set state addNewComment on value change
-     */
-    inputAddCommentChangeHandler = (e) => {
-        this.setState({ addNewComment: e.target.value });
-    }
-
-    /**
-     * @memberof Profile
-     * @description Adding new comments to post
-     */
-    addCommentClickHandler = () => {
-
-        if (this.state.addNewComment === "") {
-            return;
-        } else {
-            let _selectedPostItem = this.state.selectedPost;
-            _selectedPostItem.comments['data'] = _selectedPostItem.comments['data'] || [];
-            _selectedPostItem.comments['data'].push({
-                id: (_selectedPostItem.comments['data'].length + 1) ,
-                comment_by: this.state.username,
-                comment_value: this.state.addNewComment
-            });
-
-            let _userPosts = this.state.userPosts;
-            const _selectedIndex = this.state.selectedIndex;
-            _userPosts[_selectedIndex] = _selectedPostItem;
-
-            this.setState({
-                selectedPost: _selectedPostItem,
-                userPosts: _userPosts,
-                addNewComment: ''
-            });
+    likeClickHandler = (id) =>{
+      var foundItem = this.state.currentItem;
+      if (typeof foundItem !== undefined) {
+        if (!this.state.likeSet.has(id)) {
+          foundItem.likes.count++;
+          this.setState(({likeSet}) => ({
+            likeSet:new Set(likeSet.add(id))
+          }))
+        }else {
+          foundItem.likes.count--;
+          this.setState(({likeSet}) =>{
+            const newLike = new Set(likeSet);
+            newLike.delete(id);
+            return {
+              likeSet:newLike
+            };
+          });
         }
+      }
     }
 
+    onAddCommentClicked = (id) => {
+      if (this.state.currentComment === "" || typeof this.state.currentComment === undefined) {
+        return;
+      }
+
+      let commentList = this.state.comments.hasOwnProperty(id)?
+        this.state.comments[id].concat(this.state.currentComment): [].concat(this.state.currentComment);
+
+      this.setState({
+        comments:{
+          ...this.state.comments,
+          [id]:commentList
+        },
+        currentComment:''
+      })
+    }
+
+    commentChangeHandler = (e) => {
+      this.setState({
+        currentComment:e.target.value
+      });
+    }
+
+    logout = () => {
+      sessionStorage.clear();
+      this.props.history.replace('/');
+    }
 
     render() {
-        const { classes } = this.props;
-        return (
+      let hashTags = []
+      if (this.state.currentItem !== null) {
+        hashTags = this.state.currentItem.tags.map(hash =>{
+          return "#"+hash;
+        });        
+      }
+        return(
             <div>
-                <Header showUserPic="true" pic_url={this.state.profile_picture} userName={this.state.username} />
-                <Container fixed>
-                    <Grid container spacing={3} justify="flex-start" alignItems="center">
-                        <Grid item >
-                            <Avatar alt={this.state.username} src={this.state.profile_picture} className={classes.bigAvatar} />
-                        </Grid>
-                        <Grid item >
-                            <Typography variant="h6" component="h6">
-                                {this.state.username}
-                            </Typography>
-                            <Grid container spacing={3} justify="space-between" alignItems="center">
-                                <Grid item >
-                                    <Typography variant="subtitle2">
-                                        Posts: {this.state.media}
-                                    </Typography>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="subtitle2">
-                                        Follows: {this.state.follows}
-                                    </Typography>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="subtitle2">
-                                        Followed By: {this.state.followed_by}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
-                            <Grid container spacing={2} justify="flex-start" alignItems="center">
-                                <Grid item >
-                                    <Typography variant="h6">
-                                        {this.state.full_name}
-                                    </Typography>
-                                </Grid>
-                                <Grid item>
-                                    <Fab color="secondary" aria-label="Edit" className={classes.fab} onClick={this.handleEditNameOpen}>
-                                        <Create />
-                                    </Fab>
-                                    <Modal
-                                        aria-labelledby="simple-modal-title"
-                                        aria-describedby="simple-modal-description"
-                                        open={this.state.editNameOpen}
-                                        onClose={this.handleEditNameClose}
-                                    >
-                                        <div className={classes.paper}>
-                                            <Typography variant="h6" id="modal-title" className="edit-fullname-modal-title">
-                                                Edit
-                                            </Typography>
-                                            <FormControl required className="formControl">
-                                                <InputLabel htmlFor="username">Full Name </InputLabel>
-                                                <Input id="userfullname" type="text"
-                                                    onChange={this.inputFullNameChangeHandler} value={this.state.editFullName} />
-                                                <FormHelperText className={this.state.fullnameRequired}>
-                                                    <span className="red">Required</span>
-                                                </FormHelperText>
-                                            </FormControl><br /><br />
-                                            <Button variant="contained" color="primary" style={{ width: 10 }} onClick={this.updateNameClickHandler}>UPDATE</Button>
-                                        </div>
-                                    </Modal>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-
-                    <GridList cellHeight={320} cols={3} >
-                        {(this.state.userPosts || []).map((post, index) => (
-                            <GridListTile key={post.id} className="grid-item" onClick={() => this.handlePostClickHandler(post.id, index)}>
-                                <img src={post.images.low_resolution.url} alt={post.caption.text} />
-                            </GridListTile>
-                        ))}
-
-                    </GridList>
-                    {this.state.selectedPost !== null ?
+                <Header
+                  screen={"Profile"}
+                  pic_url={this.state.profile_picture}
+                  handleLogout={this.logout}/>
+                <div className="user-info-section">
+                    <Avatar
+                        alt="User Image"
+                        src={this.state.profile_picture}
+                        style={{width: "50px", height: "50px"}}
+                    />
+                    <span style={{marginLeft: "20px"}}>
+                        <div style={{width: "600px", fontSize: "big"}}> {this.state.username} <br />
+                            <div style={{float: "left", width: "200px", fontSize: "small"}}> Posts: {this.state.posts} </div>
+                            <div style={{float: "left", width: "200px", fontSize: "small"}}> Follows: {this.state.follows} </div>
+                            <div style={{float: "left", width: "200px", fontSize: "small"}}> Followed By: {this.state.followed_by}</div> <br />
+                        </div>
+                        <div style={{fontSize: "small"}}> {this.state.full_name}
+                        <Button mini variant="fab" color="secondary" aria-label="Edit" style={{marginLeft: "20px"}} onClick={this.handleOpenEditModal}>
+                            <Icon>edit_icon</Icon>
+                        </Button>
+                        </div>
                         <Modal
-                            aria-labelledby="simple-modal-title"
-                            aria-describedby="simple-modal-description"
-                            open={this.state.postItemOpen}
-                            onClose={this.handlePostItemClose}
+                            aria-labelledby="edit-modal"
+                            aria-describedby="modal to edit user full name"
+                            open={this.state.editOpen}
+                            onClose={this.handleCloseEditModal}
+                            style={{alignItems: 'center', justifyContent: 'center'}}
                         >
-                            <div className={classes.paper_big}>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={6}>
-                                        <img src={this.state.selectedPost.images.standard_resolution.url} width="100%" alt={(this.state.selectedPost.caption.text).split('\n')[0]} />
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Grid container spacing={3} justify="flex-start" alignItems="center">
-                                            <Grid item >
-                                                <Avatar src={this.state.selectedPost.user.profile_picture} alt={this.state.selectedPost.user.username} />
-                                            </Grid>
-                                            <Grid item >
-                                                <Typography variant="subtitle2">
-                                                    {this.state.selectedPost.user.username}
-                                                </Typography>
-                                            </Grid>
-                                        </Grid>
-                                        <Divider light />
-                                        <Grid container spacing={3} justify="flex-start" alignItems="center">
-                                            <Grid item >
-                                                <Typography variant="caption">
-                                                    {(this.state.selectedPost.caption.text).split('\n')[0]}
-                                                </Typography>
-                                            </Grid>
-                                        </Grid>
-                                        <Grid container spacing={3} justify="flex-start" alignItems="center">
-                                            <Grid item >
-                                                {(this.state.selectedPost.tags || []).map((tag, i) => {
-                                                    return <Typography variant="caption" color="primary"> #{tag}</Typography>
-                                                })}
-                                            </Grid>
-                                        </Grid>
-
-                                        <Grid container spacing={1} justify="flex-start" alignItems="center">
-                                            <Grid item className="comments-min-height">
-                                                {(this.state.selectedPost.comments.data || []).map((comment, i) => {
-                                                    return <Typography key={comment.id} variant="caption" display="block">
-                                                        <strong>{comment.comment_by} :</strong> {comment.comment_value}
-                                                    </Typography>
-                                                })}
-                                            </Grid>
-                                        </Grid>
-
-                                        <Grid container spacing={1} justify="flex-start" alignItems="center">
-                                            <Grid item >
-                                                <Favorite className={this.state.selectedPost.user_has_liked ? 'redColor' : 'greyColor'} onClick={this.likesClickHandler} />
-                                            </Grid>
-                                            <Grid item >
-                                                <Typography variant="caption">
-                                                    {(this.state.selectedPost.likes.count)} likes
-                                               </Typography>
-                                            </Grid>
-                                        </Grid>
-
-                                        <Grid container spacing={2} justify="flex-start" alignItems="center">
-                                            <Grid item >
-                                                <FormControl className="formControl">
-                                                    <InputLabel htmlFor="addcomment">Add a comment </InputLabel>
-                                                    <Input id="addcomment" type="text" onChange={this.inputAddCommentChangeHandler} value={this.state.addNewComment} />
-                                                </FormControl>
-                                            </Grid>
-                                            <Grid item >
-                                                <Button variant="contained" color="primary" onClick={this.addCommentClickHandler}>ADD</Button>
-                                            </Grid>
-                                        </Grid>
-
-                                    </Grid>
-                                </Grid>
+                            <div style={profileStyles.paper}>
+                                <Typography variant="h5" id="modal-title">
+                                    Edit
+                                </Typography><br />
+                                <FormControl required>
+                                    <InputLabel htmlFor="fullname">Full Name</InputLabel>
+                                    <Input id="fullname" onChange={this.inputFullNameChangeHandler} />
+                                    <FormHelperText className={this.state.fullNameRequired}><span className="red">required</span></FormHelperText>
+                                </FormControl><br /><br /><br />
+                                <Button variant="contained" color="primary" onClick={this.updateClickHandler}>
+                                    UPDATE
+                                </Button>
                             </div>
-                        </Modal> : ""}
-                </Container>
+                        </Modal>
+                    </span>
+                </div>
+
+                {this.state.mediaData != null &&
+                <GridList cellHeight={'auto'} cols={3} style={{padding: "40px"}}>
+                {this.state.mediaData.map(item => (
+                    <GridListTile key={item.id}>
+                    <CardMedia
+                        id={item.id}
+                        style={profileStyles.media}
+                        image={item.images.standard_resolution.url}
+                        title={item.caption.text}
+                        onClick={this.handleOpenImageModal}
+                    />
+                    </GridListTile>
+                ))}
+                </GridList>}
+
+                {this.state.currentItem != null &&
+                <Modal
+                    aria-labelledby="image-modal"
+                    aria-describedby="modal to show image details"
+                    open={this.state.imageModalOpen}
+                    onClose={this.handleCloseImageModal}
+                    style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
+                    <div style={{display:'flex',flexDirection:'row',backgroundColor: "#fff",width:'70%',height:'70%'}}>
+                      <div style={{width:'50%',padding:10}}>
+                        <img style={{height:'100%',width:'100%'}}
+                          src={this.state.currentItem.images.standard_resolution.url}
+                          alt={this.state.currentItem.caption.text} />
+                      </div>
+
+                      <div style={{display:'flex', flexDirection:'column', width:'50%', padding:10}}>
+                        <div style={{borderBottom:'2px solid #f2f2f2',display:'flex', flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
+                          <Avatar
+                            alt="User Image"
+                            src={this.state.profile_picture}
+                            style={{width: "50px", height: "50px",margin:'10px'}}/>
+                            <Typography component="p">
+                              {this.state.username}
+                            </Typography>
+                        </div>
+                        <div style={{display:'flex', height:'100%', flexDirection:'column', justifyContent:'space-between'}}>
+                          <div>
+                            <Typography component="p">
+                              {this.state.currentItem.caption.text}
+                            </Typography>
+                            <Typography style={{color:'#4dabf5'}} component="p" >
+                              {hashTags.join(' ')}
+                            </Typography>
+                            {this.state.comments.hasOwnProperty(this.state.currentItem.id) && this.state.comments[this.state.currentItem.id].map((comment, index)=>{
+                              return(
+                                <div key={index} className="rowStyle">
+                                  <Typography component="p" style={{fontWeight:'bold'}}>
+                                    {sessionStorage.getItem('username')}:
+                                  </Typography>
+                                  <Typography component="p" >
+                                    {comment}
+                                  </Typography>
+                                </div>
+                              )
+                            })}
+                          </div>
+                          <div>
+                            <div className="rowStyle">
+                              <IconButton aria-label="Add to favorites" onClick={this.likeClickHandler.bind(this,this.state.currentItem.id)}>
+                                {this.state.likeSet.has(this.state.currentItem.id) && <FavoriteIconFill style={{color:'#F44336'}}/>}
+                                {!this.state.likeSet.has(this.state.currentItem.id) && <FavoriteIconBorder/>}
+                              </IconButton>
+                              <Typography component="p">
+                                {this.state.currentItem.likes.count} Likes
+                              </Typography>
+                            </div>
+                            <div className="rowStyle">
+                              <FormControl style={{flexGrow:1}}>
+                                <InputLabel htmlFor="comment">Add Comment</InputLabel>
+                                <Input id="comment" value={this.state.currentComment} onChange={this.commentChangeHandler}/>
+                              </FormControl>
+                              <FormControl>
+                                <Button onClick={this.onAddCommentClicked.bind(this,this.state.currentItem.id)}
+                                   variant="contained" color="primary">
+                                  ADD
+                                </Button>
+                              </FormControl>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </Modal>}
             </div>
         )
     }
-
 }
 
-export default withStyles(styles)(Profile);
+export default Profile;
