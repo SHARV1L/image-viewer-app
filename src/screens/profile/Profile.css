@@ -1,28 +1,11 @@
-.user-details-container{
+.user-info-section {
     display: flex;
+    justify-content: center;
+    margin-top: 100px;
 }
-.user-details{
-    display: flex;
-    flex-direction: column;
-}
-.edit-fullname-modal-title{
-    margin-bottom: 16px !important;
-}
-.grid-item{
-    cursor: pointer;
-}
-.tags{
-    color: blue;
-}
-.redColor{
-    color: red;
-    cursor: pointer;
-}
-.greyColor{
-    color: grey;
-    cursor: pointer;
-}
-.comments-min-height{
-    min-height: 50Px;
-    margin-bottom: 20px;
+.rowStyle{
+  display:flex;
+  flex-direction:row;
+  justify-content:flex-start;
+  align-items:center
 }
